@@ -133,6 +133,13 @@
       font-family:'Melete',sans-serif; letter-spacing:.2em; font-size:clamp(16px,4.5vw,22px); padding:14px 34px; color:#fff; background:rgba(0,0,0,.55); min-height:48px;
       border:1px solid rgba(255,255,255,.35); border-radius:999px; cursor:pointer; backdrop-filter:blur(8px); }
     .skip-intro.show{ display:block; }
+    .unmute-hint{ position:absolute; left:50%; bottom:max(28px,env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:4; display:none;
+      font-family:'Melete',sans-serif; letter-spacing:.14em; font-size:clamp(13px,3.4vw,18px); padding:11px 26px; color:var(--lime);
+      background:rgba(0,0,0,.6); border:2px solid var(--lime); border-radius:999px; cursor:pointer; text-transform:uppercase;
+      text-shadow:0 0 10px rgba(184,255,0,.5); box-shadow:0 0 16px rgba(184,255,0,.25); animation:unmute-pulse 1.6s ease-in-out infinite; }
+    .unmute-hint.show{ display:block; }
+    .unmute-hint:hover{ background:rgba(0,0,0,.8); }
+    @keyframes unmute-pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.55; } }
     .skip-intro:hover{ border-color:var(--lime); color:var(--lime); }
     @media (max-width:760px){ .intro-start{ top:34%; gap:12px; } .intro-brand{ font-size:clamp(34px,11vw,74px); } .enter-btn{ font-size:clamp(18px,5vw,24px); padding:12px 28px; letter-spacing:.16em; } }
     .rotate-hint{ margin-top:14px; display:flex; align-items:center; gap:12px; font-family:'Melete',sans-serif; letter-spacing:.14em;
@@ -218,6 +225,7 @@
     <div id="rotateHint" class="rotate-hint"><span class="rotate-ico">&#8635;</span><span data-i18n="rotate">ROTATE YOUR PHONE</span></div>
   </div>
   <button id="skipIntro" class="skip-intro" type="button" data-i18n="skip">SKIP ▸</button>
+  <button id="unmuteHint" class="unmute-hint" type="button">🔇 TAP FOR SOUND</button>
 </div>
   <canvas id="scene" tabindex="0" aria-label="3D radio space"></canvas>
   <div class="brand-mark" aria-hidden="true">by BURDIK</div>
@@ -7234,8 +7242,16 @@ setInterval(()=>{ if(movieOpen && filmWrap.style.display!=='none' && filmFrame.c
       const startUI = document.querySelector('#introStart');
       const skip = document.querySelector('#skipIntro');
       const enter = document.querySelector('#enterIntro');
+      const unmuteHint = document.querySelector('#unmuteHint');
 
       const INTRO_SRC = "intro-radiobu.mp4"; try{vid.src=INTRO_SRC;vid.preload="auto";}catch(e){}
+
+      if (unmuteHint) {
+        unmuteHint.addEventListener('click', () => {
+          try { vid.muted = false; vid.volume = 1; vid.play(); } catch(e){}
+          unmuteHint.classList.remove('show');
+        });
+      }
 
       let done = false, started = false, audioUnlocked = false;
 
@@ -7274,7 +7290,8 @@ setInterval(()=>{ if(movieOpen && filmWrap.style.display!=='none' && filmFrame.c
           if (p && p.catch) p.catch(() => {
             try { vid.muted = true; } catch(e){}
             const p2 = vid.play();
-            if (p2 && p2.catch) p2.catch(() => skip.classList.add('show'));
+            if (p2 && p2.catch) { skip.classList.add('show'); }
+            else if (unmuteHint) { unmuteHint.classList.add('show'); }
           });
         }
 
